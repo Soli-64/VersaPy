@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "versapy"
+version = "0.1.0"
+description = "Tauri-like Python framework for webview apps"
+authors = [
+  { name = "Lso", email = "soli64.games@gmail.com" }
+]
+
+license = "MIT"
+requires-python = ">=3.8"
+dependencies = ["python-socketio", "python-dotenv", "pywebview", "pyinstaller", "uvicorn", "fastapi"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["versapy"]
