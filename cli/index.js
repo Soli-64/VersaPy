@@ -2,7 +2,7 @@
 
 import chalk from "chalk";
 import prompts from "prompts";
-import { checkPython, createPythonEnv, installPythonDeps, cloneTemplate, editPackageJson } from "./utils.js";
+import { checkPython, createPythonEnv, installPythonDeps, cloneTemplate, editPackageJson, copyTemplate, isDirEmpty } from "./utils.js";
 import fs from "fs";
 import path from "path";
 import { execSync } from "child_process";
@@ -10,24 +10,12 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-function copyTemplate(templateName, destDir) {
-  const src = path.join(__dirname, "templates", templateName);
-  fs.copyFileSync(src, destDir);
-//   console.log(` Copied ${templateName} template to ${destDir}`);
-}
-
-function isDirEmpty(dir) {
-  if (!fs.existsSync(dir)) return true; // le dossier n’existe pas encore
-  const files = fs.readdirSync(dir).filter(f => !f.startsWith("."));
-  return files.length === 0;
-}
-
 async function main() {
 
     console.log(chalk.green(`
     ===================================
             Welcome to VersaPy
-        Tauri-like Python Framework
+        Desktop App Python Framework
     ===================================
     `));
 
@@ -40,11 +28,13 @@ async function main() {
 
     const { name } = response1;
 
+    // Changing process path if a new dir has been created
     if (name.trim() !== ".") {
         fs.mkdirSync(name);
         process.chdir(name);
     }
 
+    // Vite can't create properly without interaction if the dir isn't empty 
     const verif = isDirEmpty(".")
     if (!verif) {
         console.log(
@@ -100,10 +90,21 @@ async function main() {
 
     const { pkgManager, frontend, typescript } = response2;
 
+    // inializing vite
     cloneTemplate(pkgManager, frontend, typescript);
 
+    // install vite deps if needed
     execSync(`${pkgManager} install`)
 
+    // installing
+
+    // If the package isn't released or if you made your own version,
+    // use npm link or install your local version
+
+    execSync(`${pkgManager} install versapy`)
+    // execSync(`${pkgManager} link versapy`)
+
+    // editing scripts and deps
     editPackageJson()
 
     // create Pyhon Venv, Base Script and Deps
@@ -111,22 +112,25 @@ async function main() {
     checkPython();
     const venvPath = createPythonEnv();
     installPythonDeps(venvPath, [
-        // "versapy" 
+        
+        /** 
+         * If the module isn't released or you modified it replace here the absolute path
+         * to your local version.
+        */ 
+        "versapy",    
+
     ]);
-
-
-    // Creating versapy.dev.js file
-
-    // fs.writeFileSync("versapy.dev.js", versapyDevJSContent)
-    copyTemplate("versapy.dev.js", "./versapy.dev.js")
 
     // Creating .env file
 
-    copyTemplate(".env", "./.env")
+    // Env file is a temp solution, i'm searching for another 
+    // solution to share the url where the back will from front to back
+
+    copyTemplate(__dirname, ".env", "./.env")
 
     // Creating versapy.config.json
 
-    let tempName = name !== "." ? name : "MyVersapyApp"
+    let winName = name !== "." ? name : "MyVersapyApp" // Default Name if project was created without
 
     const config = {
         pythonVenv: venvPath,
@@ -134,7 +138,7 @@ async function main() {
             url: "http://localhost:5173"
         },
         window: {
-            title: tempName,
+            title: winName,
             width: 1024,
             height: 768,
             resizable: true,
@@ -148,9 +152,9 @@ async function main() {
 
     fs.mkdirSync("src-versapy");
 
-    // Creating sample backend file
+    // Creating sample backend exemple file
 
-    copyTemplate('main.py', './src-versapy/main.py')
+    copyTemplate(__dirname, 'main.py', './src-versapy/main.py')
 
 }
 

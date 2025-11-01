@@ -5,25 +5,26 @@ import fs from "fs";
 
 const pythonExe = process.platform === "win32" ? "python" : "python3"
 
+
 function checkPython() {
   try {
     const version = execSync(`${pythonExe} --version`)
       .toString()
       .trim();
-    console.log(`✅ Python détecté`);
+    console.log(`Python successfuly detected`);
   } catch {
-    console.error("❌ Python non détecté. Installez Python 3.9+");
+    console.error("Python not detected. Please install Python >=3.9");
     process.exit(1);
   }
 }
 
 function createPythonEnv() {
     const venvPath = path.join(process.cwd(), "venv");
-    console.log("🐍 Création de l'environnement virtuel Python...");
+    console.log("Creating python virtual env.");
     try {
         execSync(`${pythonExe} -m venv venv`, { stdio: "inherit" });
     } catch (error) {
-        console.error("❌ Échec de la création de l'environnement virtuel.", error);
+        console.error("Error while creating the .", error);
         process.exit(1);
     }
     console.log("✅ Environnement virtuel créé.");
@@ -41,10 +42,15 @@ function installPythonDeps(venvPath, libs) {
   }
 }
 
+function copyTemplate(__dirname, templateName, destDir) {
+  const src = path.join(__dirname, "templates", templateName);
+  fs.copyFileSync(src, destDir);
+}
+
 function cloneTemplate(pkgMan, framework, ts) {
 
     try {
-        execSync(`${pkgMan} create vite@latest . ${pkgMan === "npm" && "--"} --template ${framework}${ts ? "-ts" : ""} --no-interactive --no-rolldown `, { stdio: "inherit" });
+        execSync(`${pkgMan} create vite@latest . ${pkgMan === "npm" && "--"} --template ${framework}${ts ? "-ts" : ""} --no-interactive --no-rolldown `, { stdio: "ignore" });
     } catch (error) {
         console.error("❌ Échec de la création du projet.", error);
         process.exit(1);
@@ -52,19 +58,28 @@ function cloneTemplate(pkgMan, framework, ts) {
 
 }
 
+function isDirEmpty(dir) {
+  if (!fs.existsSync(dir)) return true; // le dossier n’existe pas encore
+  const files = fs.readdirSync(dir).filter(f => !f.startsWith("."));
+  return files.length === 0;
+}
+
 function editPackageJson() {
   const pkgPath = `./package.json`;
   const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
 
-  pkg.scripts.dev = "node ./versapy.dev.js";
+  pkg.scripts.dev = "vpy-dev";
+  pkg.scripts.build = "vpy-build"
   pkg.scripts.vite = "vite"
-  pkg.dependencies.versapy = "0.0.0"
-  // pkg.scripts["versapy:dev"] = "node ./versapy/cli/versapy-dev.js";
-
-  // pkg.scripts.build = "vite build";
+  
+  if (!pkg.dependencies) {
+    pkg.dependencies = {}
+  }
+  
+  // pkg.dependencies.versapy = "0.0.0"
 
   fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
   console.log(" package.json succesfuly updated!");
 }
 
-export { checkPython, createPythonEnv, installPythonDeps, cloneTemplate, editPackageJson };
+export { checkPython, createPythonEnv, installPythonDeps, cloneTemplate, editPackageJson, copyTemplate, isDirEmpty};

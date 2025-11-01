@@ -1,6 +1,5 @@
-from versapy import expose, run_versapy, load_config
+from versapy import expose, run_versapy
     
-config = load_config("versapy.config.json")
 
 @expose
 def greet(name: str) -> str:
@@ -8,4 +7,4 @@ def greet(name: str) -> str:
     return f"Hello, {name}!"
 
 if __name__ == "__main__":
-    run_versapy(config)
+    run_versapy()

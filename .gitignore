@@ -1,4 +1,5 @@
 
-packages/node_modules
-core/build
-core/versapy.egg-info
+cli/node_modules
+js-module/node_modules
+python-module/build
+python-module/versapy.egg-info

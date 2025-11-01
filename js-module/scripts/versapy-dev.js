@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 
 import { spawn } from "child_process";
 
@@ -38,7 +39,6 @@ try {
 function shutdown() {
     console.log("\n🛑 Stopping VersaPy...");
     
-    // Tente d’arrêter les deux serveurs proprement
     try {
         if (vite && vite.pid) process.kill(vite.pid);
     } catch {}

@@ -1,24 +1,22 @@
 {
   "name": "versapy",
   "version": "0.1.0",
-  "description": "",
+  "description": "The Versapy Project module",
   "license": "ISC",
-  "author": "",
+  "author": "Lso",
   "type": "module",
   "exports": {
-    "./cli": "./cli/index.js",
     "./api": "./api/index.js"
   },
   "files": [
-    "cli",
+    "scripts",
     "api"
   ],
   "bin": {
-    "create-versapy": "./cli/index.js"
+    "vpy-build": "./scripts/versapy-build.js",
+    "vpy-dev": "./scripts/versapy-dev.js"
   },
   "dependencies": {
-    "chalk": "^5.6.2",
-    "prompts": "^2.4.2",
     "socket.io-client": "^4.8.1"
   }
 }
