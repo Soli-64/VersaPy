@@ -1,5 +1,12 @@
 
 cli/node_modules
+cli/package-lock.json
+
 js-module/node_modules
+js-module/package-lock.json
+
 python-module/build
+python-module/dist
 python-module/versapy.egg-info
+
+.env

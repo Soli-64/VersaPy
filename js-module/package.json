@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "The Versapy Project module",
   "license": "ISC",
-  "author": "Lso",
+  "author": "_lso",
   "type": "module",
   "exports": {
     "./api": "./api/index.js"
