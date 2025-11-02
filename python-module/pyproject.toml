@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "versapy"
-version = "0.1.0"
+version = "0.1.2"
 description = "Tauri-like Python framework for webview apps"
 authors = [
   { name = "lso", email = "lso.contact@proton.me" }
@@ -16,4 +16,8 @@ dependencies = ["python-socketio", "python-dotenv", "pywebview", "pyinstaller", 
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["versapy"]
+include = [
+  "versapy",
+  "LICENSE.md",
+  "README.md"
+]
