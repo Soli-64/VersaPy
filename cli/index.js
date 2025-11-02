@@ -91,7 +91,7 @@ async function main() {
     const { pkgManager, frontend, typescript } = response2;
 
     // inializing vite
-    cloneTemplate(pkgManager, frontend, typescript);
+    cloneTemplate(__dirname, frontend, typescript);
 
     // install vite deps if needed
     execSync(`${pkgManager} install`)

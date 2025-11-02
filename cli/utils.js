@@ -1,14 +1,14 @@
 
 import { execSync } from "child_process";
 import path from "path";
-import fs from "fs";
+import fs, { cpSync } from "fs";
 
 const pythonExe = process.platform === "win32" ? "python" : "python3"
 
 
 function checkPython() {
   try {
-    const version = execSync(`${pythonExe} --version`)
+    execSync(`${pythonExe} --version`)
       .toString()
       .trim();
     console.log(`Python successfuly detected`);
@@ -47,11 +47,19 @@ function copyTemplate(__dirname, templateName, destDir) {
   fs.copyFileSync(src, destDir);
 }
 
-function cloneTemplate(pkgMan, framework, ts) {
+function cloneTemplate(__dirname, framework, ts) {
 
     try {
-        execSync(`${pkgMan} create vite@latest . ${pkgMan === "npm" && "--"} --template ${framework}${ts ? "-ts" : ""} --no-interactive --no-rolldown `, { stdio: "ignore" });
-    } catch (error) {
+        const src = path.join(__dirname, "templates");
+        cpSync(`${src}/frontend/vite-${framework}${ts && "-ts"}`, ".", { recursive: true })
+
+        fs.mkdirSync("public")
+        copyTemplate(__dirname, `frontend/vite-public/vite.svg`, "./public/vite.svg")
+
+        copyTemplate(__dirname, `frontend/README.md`, "./README.md")
+        copyTemplate(__dirname, `frontend/vite-gitignore`, "./.gitignore")
+
+      } catch (error) {
         console.error("❌ Échec de la création du projet.", error);
         process.exit(1);
     }
@@ -59,7 +67,7 @@ function cloneTemplate(pkgMan, framework, ts) {
 }
 
 function isDirEmpty(dir) {
-  if (!fs.existsSync(dir)) return true; // le dossier n’existe pas encore
+  if (!fs.existsSync(dir)) return true;
   const files = fs.readdirSync(dir).filter(f => !f.startsWith("."));
   return files.length === 0;
 }
@@ -72,12 +80,6 @@ function editPackageJson() {
   pkg.scripts.build = "vpy-build"
   pkg.scripts.vite = "vite"
   
-  if (!pkg.dependencies) {
-    pkg.dependencies = {}
-  }
-  
-  // pkg.dependencies.versapy = "0.0.0"
-
   fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
   console.log(" package.json succesfuly updated!");
 }
