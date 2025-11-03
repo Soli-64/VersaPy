@@ -117,8 +117,8 @@ async function init() {
 
     // If you made your own local version of the module use npm link or install your local version
 
-    // execSync(`${pkgManager} install versapy`)
-    execSync(`${pkgManager} link versapy`)
+    execSync(`${pkgManager} install versapy`)
+    // execSync(`${pkgManager} link versapy`)
 
     console.log(
         "Project node dependencies successfuly installed. "
@@ -144,8 +144,7 @@ async function init() {
     installPythonDeps(venvPath, [
          
         // If you made your own local version of the module replace here by the absolute path to your local version.
-        // "versapy",    
-        "C:\\Users\\louis\\Desktop\\Dev\\projets\\versapy\\python-module"
+        "versapy",    
 
     ]);
 
