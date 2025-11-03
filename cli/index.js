@@ -10,23 +10,20 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-async function main() {
-
-    console.log(chalk.green(`
-    ===================================
-            Welcome to VersaPy
-        Desktop App Python Framework
-    ===================================
-    `));
-
-    const response1 = await prompts({
-        type: "text",
-        name: "name",
-        message: "Enter your project name:",
-        initial: "my-versapy-app"
-    });
-
-    const { name } = response1;
+async function manageProjectDir(argTargetDir) {
+    let name;
+    if (!argTargetDir) {
+        const response1 = await prompts({
+            type: "text",
+            name: "name",
+            message: "Enter your project name:",
+            initial: "my-versapy-app"
+        });
+    
+        name = response1.name;
+    } else {
+        name = argTargetDir
+    }
 
     // Changing process path if a new dir has been created
     if (name.trim() !== ".") {
@@ -43,8 +40,26 @@ async function main() {
                 `
             )
         )
-        return
+        return process.exit(1)
     }
+
+    return { name }
+}
+
+async function init() {
+
+    const argv = process.argv.slice(2)
+
+    const argTargetDir = argv[0] ? String(argv[0]) : undefined
+
+    console.log(chalk.green(`
+    ===================================
+            Welcome to VersaPy
+        Desktop App Python Framework
+    ===================================
+    `));
+
+    let { name } = await manageProjectDir(argTargetDir)
 
     // Creating Frontend: Vite + Framework ( + Ts )
 
@@ -93,40 +108,46 @@ async function main() {
     // inializing vite
     cloneTemplate(__dirname, frontend, typescript);
 
+    console.log(
+        "Vite project initialized. Installing Dependencies... "
+    )
+
     // install vite deps if needed
     execSync(`${pkgManager} install`)
 
-    // installing
+    // If you made your own local version of the module use npm link or install your local version
 
-    // If the package isn't released or if you made your own version,
-    // use npm link or install your local version
+    // execSync(`${pkgManager} install versapy`)
+    execSync(`${pkgManager} link versapy`)
 
-    execSync(`${pkgManager} install versapy`)
-    // execSync(`${pkgManager} link versapy`)
+    console.log(
+        "Project node dependencies successfuly installed. "
+    )
 
-    // editing scripts and deps
+    // editing scripts
     editPackageJson()
 
     // create Pyhon Venv, Base Script and Deps
     
+    console.log(
+        "Creating Python Backend..."
+    )
+
     checkPython();
+    
     const venvPath = createPythonEnv();
+
+    console.log(
+        "Installing python Dependencies..."
+    )
+
     installPythonDeps(venvPath, [
-        
-        /** 
-         * If the module isn't released or you modified it replace here the absolute path
-         * to your local version.
-        */ 
-        "versapy",    
+         
+        // If you made your own local version of the module replace here by the absolute path to your local version.
+        // "versapy",    
+        "C:\\Users\\louis\\Desktop\\Dev\\projets\\versapy\\python-module"
 
     ]);
-
-    // Creating .env file
-
-    // Env file is a temp solution, i'm searching for another 
-    // solution to share the url where the back will from front to back
-
-    copyTemplate(__dirname, ".env", "./.env")
 
     // Creating versapy.config.json
 
@@ -136,6 +157,10 @@ async function main() {
         pythonVenv: venvPath,
         frontend: {
             url: "http://localhost:5173"
+        },
+        backend: {
+            host: "localhost",
+            port: 5000
         },
         window: {
             title: winName,
@@ -156,7 +181,21 @@ async function main() {
 
     copyTemplate(__dirname, 'main.py', './src-versapy/main.py')
 
+    console.log(
+        chalk.green(
+            "\n Versapy Project successfuly created."
+        )
+    )
+
+    console.log(
+        "Now run: \
+            npm run dev \
+        \
+        to run your project\
+        "
+    )
+
 }
 
 
-main();
+init();

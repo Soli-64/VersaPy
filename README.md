@@ -12,7 +12,7 @@ PyInstaller is used for packaging the app into a single executable.
 
 </p>
 
-## <u> Getting Started: </u>
+## <u> Get Started: </u>
 
 #### To use versapy, you'll need Python >=3.9 and NodeJS installed. <br/>
 #### Make sure to initialize your project in an empty directory.

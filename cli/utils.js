@@ -27,7 +27,7 @@ function createPythonEnv() {
         console.error("Error while creating the .", error);
         process.exit(1);
     }
-    console.log("✅ Environnement virtuel créé.");
+    console.log(" Python venv successfuly created.");
     return venvPath;
 }
 
@@ -60,7 +60,7 @@ function cloneTemplate(__dirname, framework, ts) {
         copyTemplate(__dirname, `frontend/vite-gitignore`, "./.gitignore")
 
       } catch (error) {
-        console.error("❌ Échec de la création du projet.", error);
+        console.error("Error while cloning the template: ", error);
         process.exit(1);
     }
 
@@ -81,7 +81,6 @@ function editPackageJson() {
   pkg.scripts.vite = "vite"
   
   fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
-  console.log(" package.json succesfuly updated!");
 }
 
 export { checkPython, createPythonEnv, installPythonDeps, cloneTemplate, editPackageJson, copyTemplate, isDirEmpty};
