@@ -1,10 +1,13 @@
-from versapy import expose, run_versapy
+import versapy as vpy
     
 
-@expose
+# create an endpoint with function name
+@vpy.expose
 def greet(name: str) -> str:
     print(f"Hello, {name}!")
     return f"Hello, {name}!"
 
+
 if __name__ == "__main__":
-    run_versapy()
+    # start the app
+    vpy.run_versapy()
