@@ -13,7 +13,7 @@ class Config:
     WINDOW_FULLSCREEN: bool
     WINDOW_RESIZABLE: bool
 
-def handle_config(path):
+def handle_config_file(path):
 
     with open(path, "r") as f:
         config = json.load(f)
@@ -45,3 +45,16 @@ def handle_config(path):
         WINDOW_FULLSCREEN=WINDOW_FULLSCREEN,
         WINDOW_RESIZABLE=WINDOW_RESIZABLE,
     )
+
+def load_config(mode) -> tuple[str, str]:
+
+    config = None
+
+    if mode == "prod":
+        config = handle_config_file("./_internal/versapy.config.json")
+        config.FRONT_URL = "./dist/index.html"
+    else:
+        config = handle_config_file("./versapy.config.json")
+        config.FRONT_URL = config.FRONT_URL
+
+    return config

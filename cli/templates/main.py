@@ -10,4 +10,4 @@ def greet(name: str) -> str:
 
 if __name__ == "__main__":
     # start the app
-    vpy.run_versapy()
+    vpy.run_app()

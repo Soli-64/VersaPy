@@ -1,15 +1,14 @@
 import { io } from "socket.io-client"
 import { loadUserConfig } from "../utils/config.js"
 
-export async function invoke(funcName, args = {}) {
+const config = await loadUserConfig()
+let BACKEND_URL = `http://${config.backend.host}:${config.backend.port}`
 
-  let BACKEND_URL;
+const socket = io(BACKEND_URL)
 
-  const config = await loadUserConfig()
-  BACKEND_URL = `http://${config.backend.host}:${config.backend.port}`
+export const invoke = (funcName, args = {}) => {
 
-  const socket = io(BACKEND_URL)
-  return await new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     
     socket.emit("invoke", { func: funcName, args });
     
@@ -22,4 +21,37 @@ export async function invoke(funcName, args = {}) {
   
   });
 
+}
+
+// Base Events
+
+export const onEvent = (event, callback) => {
+  socket.on(event, callback)
+}
+
+// Signals
+
+export function newSignal(name) {
+  let value = null
+  const listeners = new Set()
+
+  const sig = {
+    subscribe(fn) {
+      listeners.add(fn)
+      if (value !== null) fn(value)
+      return () => listeners.delete(fn)
+    },
+    get() {
+      return value
+    }
+  }
+
+  socket.on("signal_update", (data) => {
+    if (data.name === name) {
+      value = data.value
+      listeners.forEach((fn) => fn(value))
+    }
+  })
+
+  return sig
 }

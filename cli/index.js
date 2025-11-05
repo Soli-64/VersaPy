@@ -187,8 +187,8 @@ const manageFrontTemplate = async () => {
         
         // If you made your own local version of the module use link command
         
-        execSync(PKGMAN_COMMANDS[pkgManager].install, { stdio: "inherit" });
-        // execSync(PKGMAN_COMMANDS[pkgManager].link + " versapy", { stdio: "inherit" });
+        // execSync(PKGMAN_COMMANDS[pkgManager].install, { stdio: "inherit" });
+        execSync(PKGMAN_COMMANDS[pkgManager].link + " versapy", { stdio: "inherit" });
         
         // Otherwise install from registry
         execSync(PKGMAN_COMMANDS[pkgManager].add + " versapy", { stdio: "inherit" });
@@ -225,7 +225,8 @@ const managePythonEnv = () => {
     installPythonDeps(venvPath, [
          
         // If you made your own local version of the module replace here by the absolute path to your local version.
-        "versapy",    
+        // "versapy",    
+        "C:\\Users\\louis\\Desktop\\Dev\\projets\\versapy\\python-module"
 
     ]);
 

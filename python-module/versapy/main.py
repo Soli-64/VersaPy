@@ -1,44 +1,67 @@
 
-from .storage import ProjectStorage
-from .config import handle_config
-from dotenv import load_dotenv
-import os, time, socket, sys, threading as th, webview, socketio, asyncio
-
+from .src.config import load_config
+from .src.api.server import start_server
+from .src.api.event import command_name_valid
 from fastapi import FastAPI
+import sys, threading as th, webview, socketio, asyncio
 
 def is_frozen():
     return getattr(sys, 'frozen', False)
 
-load_dotenv(".env")
-
 MODE = "prod" if is_frozen() else "dev"
 
-params = {}
-if MODE == "prod":
-    params["async_mode"] = "eventlet"
-
 sio = socketio.AsyncServer(cors_allowed_origins="*", async_mode="asgi")
-app = FastAPI()
-app = socketio.ASGIApp(sio, app)
+app = socketio.ASGIApp(sio, FastAPI())
 
 registry = {}
+signals = {}
+events = {}
 
-storage = None
+# decorators
 
 def expose(func):
-    """Decorator exposing a function via HTTP API."""
+    """Decorator exposing a function via SocketIO."""
     registry[func.__name__] = func
     return func
+
+def event(func):
+    name = func.__name__
+    events[name] = None
+    if not command_name_valid(name):
+        print(
+            f"Error: wrong exposed function name: {name} \n \
+              Refer to doc for function reserved names. \n" 
+            )
+        return None
+
+    async def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+        events[name] = result
+        await sio.emit(name, result)
+        return result
+    return wrapper
+
+def signal(func):
+    name = func.__name__
+    signals[name] = None
+
+    async def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+        signals[name] = result
+        await sio.emit("signal_update", {
+            "name": name, 
+            "value": result
+        })
+        return result
+    return wrapper
 
 @sio.event
 async def invoke(sid, data):
     func_name = data.get("func")
     args = data.get("args", {})
-
     if func_name not in registry:
         await sio.emit("response", {"error": "Function not found"}, to=sid)
         return
-    
     try:
         f = registry[func_name]
         result = await f(**args) if asyncio.iscoroutinefunction(f) else f(**args)
@@ -46,46 +69,17 @@ async def invoke(sid, data):
     except Exception as e:
         await sio.emit("response", {"error": str(e)}, to=sid)
 
-@expose
-def set_value(key: str, value):
-    storage.set(key, value)
-    return f"Saved {key} = {value}"
+def run_app(debug=True):
 
-@expose
-def get_value(key: str):
-    return storage.get(key, None)
+    global MODE
 
-def start_server(config):
-    import uvicorn
-    uvicorn.run(app, host=config.BACK_HOST, port=config.BACK_PORT)
+    config = load_config(MODE)
 
-def run_versapy(debug=True):
-
-    global storage
-
-    MODE = "prod" if is_frozen() else "dev"
-
-    print(MODE)
-
-    config = None
-    front_uri = "http://localhost:5173"
-
-    if MODE == "prod":
-        config = handle_config("./_internal/versapy.config.json")
-        front_uri = "./dist/index.html"
-    else:
-        config = handle_config("./versapy.config.json")
-        front_uri = config.FRONT_URL
-
-    storage = ProjectStorage(config.PROJECT_NAME)
-
-    th.Thread(target=lambda: start_server(config), daemon=True).start()
-
-    print(front_uri)
+    th.Thread(target=lambda: start_server(app, config), daemon=True).start()
 
     window = webview.create_window(
         title=config.WINDOW_TITLE,
-        url=front_uri,
+        url=config.FRONT_URL,
         width=config.WINDOW_WIDTH,
         height=config.WINDOW_HEIGHT,
         resizable=config.WINDOW_RESIZABLE,
