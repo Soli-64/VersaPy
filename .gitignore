@@ -4,6 +4,7 @@ cli/package-lock.json
 cli/tests
 
 packages/front-utilities/node_modules
+packages/front-utilities/dist
 packages/front-utilities/package-lock.json
 
 packages/python-core/build
