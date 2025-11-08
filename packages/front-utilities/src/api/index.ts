@@ -3,7 +3,6 @@ import { loadUserConfig } from "../utils/config.js"
 
 const config = await loadUserConfig()
 let BACKEND_URL = `http://${config.backend.host}:${config.backend.port}`
-
 const socket = io(BACKEND_URL)
 
 type InvokeOptions = {
@@ -39,34 +38,26 @@ type SharedValueEventOptions<T> = {
   value: T
 }
 
-export const useSharedValue = <T>(sharedValueKey: string, onChange: (value: T) => void, initValue?: T) => {
-  if (!socket || !socket.connected) {
-    console.warn("Socket not connected yet.");
-    return [initValue, () => {}];
-  }
+export const useSharedValue = <T>(sharedValueKey: string, onChange: (value: T) => void, initValue: T): [T, (value: T) => void] => {
 
-  let value: T | undefined = initValue;
+  let value: T = initValue;
 
   const events = {
     onChange: "back_update_shared_value",
-    setChange: "front_update_shared_value",
-    getInitValue: "shared_value_init"
+    setChange: "front_update_shared_value"
   }
 
-  socket.once("shared_value_init", (options: SharedValueEventOptions<T>) => {
-    if (options.value_key === sharedValueKey) {
-      value = options.value;
-      onChange(value);
-    }
-  });
-
   const setChange = (_value: T) => {
+    console.log("Sent: ", {
+      value_key: sharedValueKey,
+      value: _value
+    })
     socket.emit(events.setChange, {
       value_key: sharedValueKey,
-      value
+      value: _value
     })
     value = _value
-    onChange(value)
+    onChange(_value)
   }
 
   socket.on(events.onChange, (options: SharedValueEventOptions<T>) => {
@@ -75,6 +66,6 @@ export const useSharedValue = <T>(sharedValueKey: string, onChange: (value: T) =
     onChange(value)
   })
 
-  return [value, setChange]
+  return [value, setChange];
 
 }

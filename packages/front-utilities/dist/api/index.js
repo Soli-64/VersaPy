@@ -18,30 +18,23 @@ export const invoke = (funcName, args = {}) => {
 export const onEvent = (event, callback) => {
     socket.on(event, callback);
 };
-export function useSharedValue(sharedValueKey, onChange, initValue) {
-    if (!socket || !socket.connected) {
-        console.warn("Socket not connected yet.");
-        return [initValue, () => { }];
-    }
+export const useSharedValue = (sharedValueKey, onChange, initValue) => {
     let value = initValue;
     const events = {
         onChange: "back_update_shared_value",
-        setChange: "front_update_shared_value",
-        getInitValue: "shared_value_init"
+        setChange: "front_update_shared_value"
     };
-    socket.once("shared_value_init", (options) => {
-        if (options.value_key === sharedValueKey) {
-            value = options.value;
-            onChange(value);
-        }
-    });
     const setChange = (_value) => {
+        console.log("Sent: ", {
+            value_key: sharedValueKey,
+            value: _value
+        });
         socket.emit(events.setChange, {
             value_key: sharedValueKey,
-            value
+            value: _value
         });
         value = _value;
-        onChange(value);
+        onChange(_value);
     };
     socket.on(events.onChange, (options) => {
         if (options.value_key !== sharedValueKey)
@@ -50,4 +43,4 @@ export function useSharedValue(sharedValueKey, onChange, initValue) {
         onChange(value);
     });
     return [value, setChange];
-}
+};

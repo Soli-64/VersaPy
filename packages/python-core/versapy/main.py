@@ -43,14 +43,28 @@ def event(func):
     return wrapper
 
 def SharedValue(key, init_value, on_change_cb):
+    
     def edit_sv_registry(_key, _value):
         if not shared_value[_key]:
-            shared_value[_key] = None
+            shared_value[_key] = _value
         shared_value[_key] = _value
 
-    sv = _SharedValue(sio, key, init_value, edit_sv_registry)
+    def get_on_registry(key_):
+        return shared_value[key_]
+
+    shared_value[key] = init_value
+    sv = _SharedValue(sio, key, init_value, edit_sv_registry, get_on_registry)
+    
     sv.on_change = on_change_cb
-    sv.register_sio()
+
+    def on_change(_):
+        received_key, received_value = _["value_key"], _ ["value"]
+        print("receive:", received_value)
+        if received_key == key:
+            edit_sv_registry(key, received_value)
+            on_change_cb(received_value)
+
+    sio.on("front_update_shared_value", lambda a,b: on_change(b))
 
     return sv
 
