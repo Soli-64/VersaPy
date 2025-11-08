@@ -8,4 +8,4 @@ function isDirEmpty(dir) {
 
 export { checkPython, createPythonEnv, installPythonDeps } from "./src/utils/python.utils.js"
 export { cloneTemplate, editPackageJson, copyTemplate } from "./src/utils/template.utils.js"
-export { isDirEmpty};
+export { isDirEmpty };

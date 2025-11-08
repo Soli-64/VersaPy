@@ -1,14 +1,14 @@
-
 cli/node_modules
 cli/package-lock.json
 cli/tests
 
 packages/front-utilities/node_modules
-packages/front-utilities/dist
 packages/front-utilities/package-lock.json
+packages/front-utilities/dist
 
 packages/python-core/build
 packages/python-core/dist
 packages/python-core/versapy.egg-info
 
 .env
+test.bat

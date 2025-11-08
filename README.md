@@ -1,5 +1,3 @@
-
-
 # **VersaPy - Build modern desktop Python apps easily**
 
 ## <u> Introduction </u>

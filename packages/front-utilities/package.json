@@ -6,8 +6,8 @@
   "author": "_lso",
   "type": "module",
   "scripts": {
-  "build": "tsc",
-  "dev": "tsc --watch"
+    "build": "tsc",
+    "dev": "tsc --watch"
   },
   "exports": {
     "./api": {
