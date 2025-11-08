@@ -1,22 +1,31 @@
 {
   "name": "versapy",
   "version": "0.1.1",
-  "description": "The Versapy Project module",
+  "description": "Versapy front utilities module",
   "license": "MIT",
   "author": "_lso",
   "type": "module",
+  "scripts": {
+  "build": "tsc",
+  "dev": "tsc --watch"
+  },
   "exports": {
-    "./api": "./api/index.js"
+    "./api": "./src/api/index.js"
   },
   "files": [
     "scripts",
     "api"
   ],
   "bin": {
-    "vpy-build": "./scripts/versapy-build.js",
-    "vpy-dev": "./scripts/versapy-dev.js"
+    "vpy-build": "./src/scripts/versapy-build.js",
+    "vpy-dev": "./src/scripts/versapy-dev.js"
   },
   "dependencies": {
     "socket.io-client": "^4.8.1"
+  },
+  "devDependencies": {
+    "@types/socket.io-client": "^1.4.36",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }

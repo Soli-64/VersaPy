@@ -37,7 +37,7 @@ try {
 
 
 function shutdown() {
-    console.log("\n🛑 Stopping VersaPy...");
+    console.log("\nStopping VersaPy...");
     
     try {
         if (vite && vite.pid) process.kill(vite.pid);
