@@ -10,15 +10,20 @@
   "dev": "tsc --watch"
   },
   "exports": {
-    "./api": "./src/api/index.js"
+    "./api": {
+      "import": "./dist/api/index.js",
+      "types": "./dist/api/index.d.ts"
+    }
   },
   "files": [
     "scripts",
-    "api"
+    "dist",
+    "README.md",
+    "LICENSE.md"
   ],
   "bin": {
-    "vpy-build": "./src/scripts/versapy-build.js",
-    "vpy-dev": "./src/scripts/versapy-dev.js"
+    "vpy-build": "./scripts/versapy-build.js",
+    "vpy-dev": "./scripts/versapy-dev.js"
   },
   "dependencies": {
     "socket.io-client": "^4.8.1"

@@ -1,5 +1,5 @@
 import io from "socket.io-client";
-import { loadUserConfig } from "../utils/config.ts";
+import { loadUserConfig } from "../utils/config.js";
 const config = await loadUserConfig();
 let BACKEND_URL = `http://${config.backend.host}:${config.backend.port}`;
 const socket = io(BACKEND_URL);
@@ -35,11 +35,13 @@ export function useSharedValue(sharedValueKey, onChange, initValue) {
             onChange(value);
         }
     });
-    const setChange = (value) => {
+    const setChange = (_value) => {
         socket.emit(events.setChange, {
             value_key: sharedValueKey,
             value
         });
+        value = _value;
+        onChange(value);
     };
     socket.on(events.onChange, (options) => {
         if (options.value_key !== sharedValueKey)

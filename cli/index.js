@@ -47,13 +47,12 @@ const args = mri(argv, {
 // Show help if requested
 if (args.help) {
     console.log(`
-    Usage: versapy [project-name] [options]
+    Usage: create-versapy [project-name] [options]
 
     Options:
         -h, --help          Show this help message
         -v, --version       Show version number
-        -t, --template      Template to use (vanilla, react, vue, etc.)
-        --typescript, --ts  Use TypeScript
+        -t, --template      Template to use (vite models templates, see doc)
     `);
     process.exit(0);
 }
@@ -66,7 +65,7 @@ if (args.version) {
 
 const manageProjectDir = async (argTargetDir) => {
     let name;
-    // First check mri parsed args, then fallback to argTargetDir
+     
     if (args._.length > 0) {
         name = args._[0];
     } else if (!argTargetDir) {
@@ -82,13 +81,12 @@ const manageProjectDir = async (argTargetDir) => {
         name = argTargetDir
     }
 
-    // Changing process path if a new dir has been created
     if (name.trim() !== ".") {
         fs.mkdirSync(name);
         process.chdir(name);
     }
 
-    // Vite can't create properly without interaction if the dir isn't empty 
+    // Vite can't create properly if the current dir isn't empty 
     const verif = isDirEmpty(".")
     if (!verif) {
         console.log(
@@ -104,7 +102,7 @@ const manageProjectDir = async (argTargetDir) => {
 }
 
 const manageFrontTemplate = async () => {
-    // Use command line arguments if provided, otherwise prompt
+    
     let framework = args.template;
     
     const baseFrameworks = [
@@ -113,7 +111,7 @@ const manageFrontTemplate = async () => {
     ];
     const validFrameworks = [...baseFrameworks, ...(baseFrameworks.map(i => i = `${i}-ts`))]
 
-    // Validate framework if provided via CLI
+    // Check cli provided framework validity
     if (framework !== "default" && !validFrameworks.includes(framework)) {
         console.log(chalk.red(`Invalid framework: ${framework}`));
         console.log(chalk.yellow(`Valid frameworks are: ${validFrameworks.join(", ")}`));
@@ -134,7 +132,7 @@ const manageFrontTemplate = async () => {
         }
     ]
 
-    // Only prompt if arguments are not provided via command line
+    // Prompt if arguments aren't provided via cli
     if (!framework || framework === 'default') {
         _prompts.push(
             {
@@ -182,16 +180,14 @@ const manageFrontTemplate = async () => {
         chalk.blue("Vite project initialized. Installing Dependencies... ")
     )
 
-    // install vite deps if needed
     try {
         
-        // If you made your own local version of the module use link command
-        
+        // install vite deps
         execSync(PKGMAN_COMMANDS[pkgManager].install, { stdio: "inherit" });
-        // execSync(PKGMAN_COMMANDS[pkgManager].link + " versapy", { stdio: "inherit" });
         
-        // Otherwise install from registry
+        // If you want to use a local version use link command otherwise install from registry
         execSync(PKGMAN_COMMANDS[pkgManager].add + " versapy", { stdio: "inherit" });
+        // execSync(PKGMAN_COMMANDS[pkgManager].link + " versapy", { stdio: "inherit" });
     
     } catch (error) {
         console.error(chalk.red("Failed to install dependencies:"), error);
@@ -203,7 +199,7 @@ const manageFrontTemplate = async () => {
         "Project front dependencies successfuly installed. "
     )
 
-    // editing scripts
+    // Add and modify scripts
     editPackageJson()
 }
 
@@ -306,6 +302,5 @@ async function init() {
     await manageTemplatesCopy(name, venvPath)
 
 }
-
 
 init();

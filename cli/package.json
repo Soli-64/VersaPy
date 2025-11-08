@@ -5,9 +5,6 @@
   "license": "MIT",
   "author": "_lso",
   "type": "module",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "bin": {
     "create-versapy": "./index.js"
   },

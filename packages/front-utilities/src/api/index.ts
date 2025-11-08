@@ -1,5 +1,5 @@
 import io from "socket.io-client"
-import { loadUserConfig } from "../utils/config.ts"
+import { loadUserConfig } from "../utils/config.js"
 
 const config = await loadUserConfig()
 let BACKEND_URL = `http://${config.backend.host}:${config.backend.port}`
@@ -39,7 +39,7 @@ type SharedValueEventOptions<T> = {
   value: T
 }
 
-export function useSharedValue<T>(sharedValueKey: string, onChange: (value: T) => void, initValue?: T) {
+export const useSharedValue = <T>(sharedValueKey: string, onChange: (value: T) => void, initValue?: T) => {
   if (!socket || !socket.connected) {
     console.warn("Socket not connected yet.");
     return [initValue, () => {}];

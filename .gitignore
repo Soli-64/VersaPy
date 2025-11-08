@@ -3,11 +3,11 @@ cli/node_modules
 cli/package-lock.json
 cli/tests
 
-js-module/node_modules
-js-module/package-lock.json
+packages/front-utilities/node_modules
+packages/front-utilities/package-lock.json
 
-python-module/build
-python-module/dist
-python-module/versapy.egg-info
+packages/python-core/build
+packages/python-core/dist
+packages/python-core/versapy.egg-info
 
 .env

@@ -14,7 +14,6 @@ sio = socketio.AsyncServer(cors_allowed_origins="*", async_mode="asgi")
 app = socketio.ASGIApp(sio, FastAPI())
 
 registry = {}
-signals = {}
 events = {}
 
 # decorators
@@ -38,20 +37,6 @@ def event(func):
         result = func(*args, **kwargs)
         events[name] = result
         await sio.emit(name, result)
-        return result
-    return wrapper
-
-def signal(func):
-    name = func.__name__
-    signals[name] = None
-
-    async def wrapper(*args, **kwargs):
-        result = func(*args, **kwargs)
-        signals[name] = result
-        await sio.emit("signal_update", {
-            "name": name, 
-            "value": result
-        })
         return result
     return wrapper
 
