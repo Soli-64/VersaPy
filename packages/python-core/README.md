@@ -9,4 +9,4 @@
 
 ## <u> Usage </u>
 
-#### This module is auto-installed in your project by the cli [create-versapy](https://github.com/Soli-64/VersaPy/tree/main/cli) while creatingyour versapy app. <br/> See the [github repo](https://github.com/Soli-64/VersaPy) for more infos and exemples.
+#### This module is auto-installed in your project by the cli [create-versapy](https://github.com/Soli-64/VersaPy/tree/main/cli) while creating your versapy app. <br/> See the [github repo](https://github.com/Soli-64/VersaPy) for more infos and exemples.

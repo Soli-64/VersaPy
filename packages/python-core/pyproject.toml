@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "versapy"
-version = "0.1.3"
-description = "Tauri-like Python framework for webview apps"
+version = "1.0.0"
+description = "Lightweight framework for desktop apps with web UI."
 authors = [
   { name = "lso", email = "lso.contact@proton.me" }
 ]
@@ -13,10 +13,16 @@ readme = "README.md"
 
 license = "MIT"
 requires-python = ">=3.9"
-dependencies = ["python-socketio", "pywebview", "pyinstaller", "uvicorn", "fastapi"]
+dependencies = [
+  "python-socketio", 
+  "pywebview", 
+  "pyinstaller", 
+  "uvicorn", 
+  "fastapi"
+]
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = [
-  "versapy"
+  "versapy", "versapy.*"
 ]
