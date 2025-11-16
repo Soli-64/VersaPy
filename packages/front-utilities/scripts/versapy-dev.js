@@ -13,7 +13,7 @@ function detectPackageManager() {
 const pkgManager = detectPackageManager();
 
 const vite = spawn(pkgManager, ["run", "vite"], {
-    stdio: "ignore",
+    stdio: "inherit",
     shell: true
 });
 

@@ -1,8 +1,8 @@
 
 import json, os, threading
 
-class ProjectStorage:
-    """JSON file-based storage for a VersaPy project."""
+class PreferencesStorage:
+    """JSON file-based storage for basic key-value storage"""
 
     def __init__(self, project_name: str):
         self.project_name = project_name
@@ -25,7 +25,6 @@ class ProjectStorage:
             with open(self._file_path, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
 
-    # Fonctions publiques
     def set(self, key: str, value):
         data = self._load()
         data[key] = value

@@ -21,8 +21,7 @@ def handle_config_file(path):
     PROJECT_NAME = config.get("project_name", "MyVersaPyProject")
     FRONT_URL = config.get("front_url", "http://localhost:5173")
 
-    # BACK_HOST = os.getenv("BACK_HOST", "127.0.0.1")
-    # BACK_PORT = os.getenv("BACK_PORT", 5000)
+    FRONT_URL = config["frontend"].get("url", "http://localhost:5173")
     BACK_HOST = config["backend"].get("host", "localhost")
     BACK_PORT = config["backend"].get("port", 5000)
 

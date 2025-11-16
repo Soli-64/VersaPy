@@ -1,7 +1,13 @@
+// vite.config.js
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import {loadConfig} from "versapy/config"
 
-// https://vite.dev/config/
-export default defineConfig({
-  plugins: [react()],
+export default defineConfig(async () => {
+  const config = await loadConfig()
+  const {port, host} = config.frontend
+  return {
+    plugins: [react()],
+    server: { port, host },
+  }
 })

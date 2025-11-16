@@ -15,4 +15,4 @@ export declare type Config = {
         fullscreen: boolean
     }
 }
-export declare function loadUserConfig(): Promise<Config>
+export declare function loadConfig(): Promise<Config>

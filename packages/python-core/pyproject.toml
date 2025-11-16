@@ -18,7 +18,8 @@ dependencies = [
   "pywebview", 
   "pyinstaller", 
   "uvicorn", 
-  "fastapi"
+  "fastapi",
+  "pydantic"
 ]
 
 [tool.setuptools.packages.find]

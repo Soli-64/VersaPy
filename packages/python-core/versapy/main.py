@@ -3,101 +3,106 @@ from .src.config import load_config
 from .src.api.server import start_server
 from .src.api.event import command_name_valid
 from .src.api.shared_value import SharedValue as _SharedValue
+from .src.storage.engine import StorageEngine
+from .src.storage.preferences import PreferencesStorage
 from fastapi import FastAPI
 import sys, threading as th, webview, socketio, asyncio
 
-def is_frozen():
-    return getattr(sys, 'frozen', False)
+MODE = "prod" if getattr(sys, 'frozen', False) else "dev"
 
-MODE = "prod" if is_frozen() else "dev"
+class VersaPyApp:
 
-sio = socketio.AsyncServer(cors_allowed_origins="*", async_mode="asgi")
-app = socketio.ASGIApp(sio, FastAPI())
+    def __init__(self):
 
-api_endpoints = {}
-events = {}
-shared_value = {}
+        self.sio = socketio.AsyncServer(cors_allowed_origins="*", async_mode="asgi")
+        self.app = socketio.ASGIApp(self.sio, FastAPI())
 
-# decorators
+        self.api_endpoints = {}
+        self.events = {}
+        self.shared_value = {}
 
-def expose(func):
-    """Decorator exposing a function via SocketIO."""
-    api_endpoints[func.__name__] = func
-    return func
+        self.config = load_config(MODE)
 
-def event(func):
-    name = func.__name__
-    events[name] = None
-    if not command_name_valid(name):
-        print(
-            f"Error: wrong exposed function name: {name} \n \
-              Refer to doc for function reserved names. \n" 
-            )
-        return None
+        self.storage = StorageEngine(f"{self.config.PROJECT_NAME}.db")
+        self.preferences = PreferencesStorage(self.config.PROJECT_NAME)
 
-    async def wrapper(*args, **kwargs):
-        result = func(*args, **kwargs)
-        events[name] = result
-        await sio.emit(name, result)
-        return result
-    return wrapper
+        self.sio.on("invoke", self.__invoke)
 
-def SharedValue(key, init_value, on_change_cb):
-    
-    def edit_sv_registry(_key, _value):
-        if not shared_value[_key]:
-            shared_value[_key] = _value
-        shared_value[_key] = _value
+    # private methods
+    async def __invoke(self, sid, data):
+        func_name = data.get("func")
+        args = data.get("args", {})
+        if func_name not in self.api_endpoints:
+            await self.sio.emit("response", {"error": "Function not found"}, to=sid)
+            return
+        try:
+            f = self.api_endpoints[func_name]
+            result = await f(**args) if asyncio.iscoroutinefunction(f) else f(**args)
+            await self.sio.emit("response", {"result": result}, to=sid)
+        except Exception as e:
+            await self.sio.emit("response", {"error": str(e)}, to=sid)
 
-    def get_on_registry(key_):
-        return shared_value[key_]
+    # decorators
+    def expose(self, func):
+        self.api_endpoints[func.__name__] = func
+        return func
 
-    shared_value[key] = init_value
-    sv = _SharedValue(sio, key, init_value, edit_sv_registry, get_on_registry)
-    
-    sv.on_change = on_change_cb
+    def event(self, func):
+        name = func.__name__
+        self.events[name] = None
+        if not command_name_valid(name):
+            print(
+                f"Error: wrong exposed function name: {name} \n \
+                Refer to doc for function reserved names. \n" 
+                )
+            return None
 
-    def on_change(_):
-        received_key, received_value = _["value_key"], _ ["value"]
-        print("receive:", received_value)
-        if received_key == key:
-            edit_sv_registry(key, received_value)
-            on_change_cb(received_value)
+        async def wrapper(*args, **kwargs):
+            result = func(*args, **kwargs)
+            self.events[name] = result
+            await self.sio.emit(name, result)
+            return result
+        return wrapper
 
-    sio.on("front_update_shared_value", lambda a,b: on_change(b))
+    # methods
+    def SharedValue(self, key, init_value, on_change_cb):
+        
+        def edit_sv_registry(_key, _value):
+            if not self.shared_value[_key]:
+                self.shared_value[_key] = _value
+            self.shared_value[_key] = _value
 
-    return sv
+        def get_on_registry(key_):
+            return self.shared_value[key_]
 
-@sio.event
-async def invoke(sid, data):
-    func_name = data.get("func")
-    args = data.get("args", {})
-    if func_name not in api_endpoints:
-        await sio.emit("response", {"error": "Function not found"}, to=sid)
-        return
-    try:
-        f = api_endpoints[func_name]
-        result = await f(**args) if asyncio.iscoroutinefunction(f) else f(**args)
-        await sio.emit("response", {"result": result}, to=sid)
-    except Exception as e:
-        await sio.emit("response", {"error": str(e)}, to=sid)
+        self.shared_value[key] = init_value
+        sv = _SharedValue(self.sio, key, init_value, edit_sv_registry, get_on_registry)
+        
+        sv.on_change = on_change_cb
 
+        def on_change(_):
+            received_key, received_value = _["value_key"], _ ["value"]
+            print("receive:", received_value)
+            if received_key == key:
+                edit_sv_registry(key, received_value)
+                on_change_cb(received_value)
 
-def run_app(debug=True):
+        self.sio.on("front_update_shared_value", lambda a,b: on_change(b))
 
-    global MODE
+        return sv
 
-    config = load_config(MODE)
+    # run app
+    def run(self, debug=True):
 
-    th.Thread(target=lambda: start_server(app, config), daemon=True).start()
+        th.Thread(target=lambda: start_server(self.app, self.config), daemon=True).start()
 
-    window = webview.create_window(
-        title=config.WINDOW_TITLE,
-        url=config.FRONT_URL,
-        width=config.WINDOW_WIDTH,
-        height=config.WINDOW_HEIGHT,
-        resizable=config.WINDOW_RESIZABLE,
-        fullscreen=config.WINDOW_FULLSCREEN
-    )
+        window = webview.create_window(
+            title=self.config.WINDOW_TITLE,
+            url=self.config.FRONT_URL,
+            width=self.config.WINDOW_WIDTH,
+            height=self.config.WINDOW_HEIGHT,
+            resizable=self.config.WINDOW_RESIZABLE,
+            fullscreen=self.config.WINDOW_FULLSCREEN
+        )
 
-    webview.start(debug=debug if not is_frozen() else False)
+        webview.start(debug=debug if MODE=="dev" else False)

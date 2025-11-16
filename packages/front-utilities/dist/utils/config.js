@@ -1,7 +1,7 @@
 export async function loadUserConfig() {
-    const res = await fetch("/versapy.config.json");
-    if (!res.ok)
-        throw new Error("Can't find file versapy.config.json");
-    const config = await res.json();
-    return config;
+    const res = await fetch('/versapy.config.json');
+    if (!res.ok) {
+        throw new Error('Failed to load versapy.config.json');
+    }
+    return await res.json();
 }

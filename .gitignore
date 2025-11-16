@@ -10,5 +10,11 @@ packages/python-core/build
 packages/python-core/dist
 packages/python-core/versapy.egg-info
 
+build
+dist
+*.local
+*.log
+*.egg-info
+
 .env
 test.bat

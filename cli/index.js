@@ -235,9 +235,9 @@ const manageTemplatesCopy = async (name, venvPath) => {
     
     // Creating versapy.config.json
     const config = {
-        pythonVenv: venvPath,
         frontend: {
-            url: "http://localhost:5173"
+            host: "localhost",
+            port: 5200
         },
         backend: {
             host: "localhost",
