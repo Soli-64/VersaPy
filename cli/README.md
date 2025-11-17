@@ -2,11 +2,11 @@
 
 ###### <hr/>
 
-### This package is the init cli for the [Versapy](https://github.com/Soli-64/VersaPy) project
+### This package is the create cli for [Versapy](https://github.com/Soli-64/VersaPy)
 
 ## <u>About the package</u>
 
-### It manages the full creation of your project, from the Vite template to the python virtyal env and deps.
+#### It manages the full creation of your project, from the Vite template to the python virtual env and deps.
 
 ## <u>Usage</u>
 

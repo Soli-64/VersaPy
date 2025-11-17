@@ -30,6 +30,7 @@ Once done, just run with:
 npm run dev
 ```
 
+### For basic examples, see: [Examples](./docs/examples/get_started.md)
 
 ## <u> Building an executable </u>
 

@@ -12,10 +12,10 @@ class SharedValue:
     def on_change(self):
         pass
 
-    def get_value(self):
+    def get(self):
         return self.get_on_registry(self.key)
 
-    async def set_change(self, value):
+    async def set(self, value):
         self.value = value
         self.edit_registry(self.key, value)
         options = {"value_key": self.key, "value": value}

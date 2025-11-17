@@ -38,7 +38,7 @@ type SharedValueEventOptions<T> = {
   value: T
 }
 
-export const useSharedValue = <T>(sharedValueKey: string, onChange: (value: T) => void, initValue: T): [T, (value: T) => void] => {
+export const useSharedValue = <T>(sharedValueKey: string, initValue: T, onChange: (value: T) => void): [T, (value: T) => void] => {
 
   let value: T = initValue;
 
