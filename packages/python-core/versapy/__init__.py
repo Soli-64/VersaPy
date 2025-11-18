@@ -1,3 +1,3 @@
 
 
-from .main import VersapyApp
+from .main import VersaPyApp

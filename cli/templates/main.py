@@ -1,4 +1,4 @@
- # src-versapy/main.py
+# src-versapy/main.py
 
 from versapy import VersaPyApp
 
@@ -12,3 +12,4 @@ def greet(name):
 if __name__ == "__main__":
     
     app.run()
+    

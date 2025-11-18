@@ -1,4 +1,4 @@
-import json, os
+import json
 from dataclasses import dataclass
 
 @dataclass
@@ -19,9 +19,12 @@ def handle_config_file(path):
         config = json.load(f)
     
     PROJECT_NAME = config.get("project_name", "MyVersaPyProject")
-    FRONT_URL = config.get("front_url", "http://localhost:5173")
+    
+    FRONT_HOST = config["frontend"].get("host", "localhost")
+    FRONT_PORT = config["frontend"].get("port", 5200)
 
-    FRONT_URL = config["frontend"].get("url", "http://localhost:5173")
+    FRONT_URL = f"http://{FRONT_HOST}:{FRONT_PORT}"
+
     BACK_HOST = config["backend"].get("host", "localhost")
     BACK_PORT = config["backend"].get("port", 5000)
 

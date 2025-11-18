@@ -18,7 +18,7 @@ export const invoke = (funcName, args = {}) => {
 export const onEvent = (event, callback) => {
     socket.on(event, callback);
 };
-export const useSharedValue = (sharedValueKey, onChange, initValue) => {
+export const useSharedValue = (sharedValueKey, initValue, onChange) => {
     let value = initValue;
     const events = {
         onChange: "back_update_shared_value",

@@ -17,7 +17,6 @@ const vite = spawn(pkgManager, ["run", "vite"], {
     shell: true
 });
 
-
 let backend;
 let python;
 
