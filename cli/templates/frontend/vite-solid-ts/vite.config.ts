@@ -9,5 +9,6 @@ export default defineConfig(async () => {
   return {
     plugins: [solid()],
     server: { port, host },
+    base: "./"
   }
 })

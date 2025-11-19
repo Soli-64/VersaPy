@@ -1,4 +1,4 @@
-import json
+import json, os
 from dataclasses import dataclass
 
 @dataclass
@@ -53,8 +53,8 @@ def load_config(mode) -> tuple[str, str]:
     config = None
 
     if mode == "prod":
-        config = handle_config_file("./_internal/versapy.config.json")
-        config.FRONT_URL = "./dist/index.html"
+        config = handle_config_file("./_internal/dist/versapy.config.json")
+        config.FRONT_URL = "http://127.0.0.1:9867"
     else:
         config = handle_config_file("./versapy.config.json")
         config.FRONT_URL = config.FRONT_URL

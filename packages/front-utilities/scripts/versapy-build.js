@@ -14,7 +14,7 @@ spawn(
     "--noconfirm",
     "--distpath", "./versapy-dist",
     "--add-data", "./dist:./dist",
-    "--add-data", "./versapy.config.json:.",
+    "--add-data", "./versapy.config.json:./dist",
     "src-versapy/main.py"],
   {
     shell: true,

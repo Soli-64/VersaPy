@@ -22,7 +22,6 @@ export const createSharedValue = (sharedValueKey, onChange) => {
     };
     invoke("get_shared_value", { key: sharedValueKey })
         .then(initialValue => {
-        console.log("Received initVal: ", initialValue);
         if (initialValue !== undefined && initialValue !== null) {
             sharedValue = initialValue;
             onChange(initialValue);

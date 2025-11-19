@@ -15,6 +15,7 @@ export default defineConfig(async () => {
       }),
     ],
     server: { port, host },
+    base: "./"
   }
   
 })

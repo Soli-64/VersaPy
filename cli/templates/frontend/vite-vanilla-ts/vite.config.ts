@@ -6,6 +6,7 @@ export default defineConfig(async () => {
   const config = await loadConfig()
   const {port, host} = config.frontend
   return {
-    server: { port, host }
+    server: { port, host },
+    base: "./"
   }
 })

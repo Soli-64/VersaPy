@@ -10,5 +10,6 @@ export default defineConfig(async () => {
   return {
     plugins: [preact()],
     server: { port, host },
+    base: "./"
   }
 })

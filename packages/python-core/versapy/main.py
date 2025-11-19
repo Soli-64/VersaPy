@@ -10,7 +10,14 @@ from fastapi import FastAPI
 from .src.utils.logs import Log
 from .src.storage.model import Model
 from .src.storage.field import Field
-import sys, threading as th, webview, socketio, asyncio
+import sys
+import threading as th
+import webview
+import socketio 
+import asyncio
+import os
+import http.server
+import socketserver
 
 MODE = "prod" if getattr(sys, 'frozen', False) else "dev"
 
@@ -51,6 +58,14 @@ class VersaPyApp:
     def __get_sv_init_val(self, key):
         return self.shared_values[key]
 
+    def __start_static_server(self):
+        os.chdir("./_internal/dist")
+
+        handler = http.server.SimpleHTTPRequestHandler
+        httpd = socketserver.TCPServer(("127.0.0.1", 9867), handler)
+
+        th.Thread(target=httpd.serve_forever, daemon=True).start()
+
     # decorators
     def expose(self, fn: Callable):
         self.__expose_fn(fn.__name__, fn)
@@ -85,6 +100,9 @@ class VersaPyApp:
     def run(self, debug=True):
 
         th.Thread(target=lambda: start_server(self.app, self.config), daemon=True).start()
+
+        if MODE == "prod":
+            self.__start_static_server()
 
         window = webview.create_window(
             title=self.config.WINDOW_TITLE,

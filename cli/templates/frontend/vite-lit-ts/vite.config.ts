@@ -8,5 +8,6 @@ export default defineConfig(async () => {
   const {port, host} = config.frontend
   return {
     server: { port, host },
+    base: "./"
   }
 })

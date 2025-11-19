@@ -10,5 +10,6 @@ export default defineConfig(async () => {
   return {
     plugins: [vue()],
     server: { port, host },
+    base: "./"
   }
 })

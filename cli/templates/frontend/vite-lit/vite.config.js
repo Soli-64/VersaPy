@@ -9,5 +9,6 @@ export default defineConfig(async () => {
 
   return {
     server: { port, host },
+    base: "./"
   }
 })

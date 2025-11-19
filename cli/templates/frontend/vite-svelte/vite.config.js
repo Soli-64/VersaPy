@@ -9,5 +9,6 @@ export default defineConfig(async () => {
   return {
     plugins: [svelte()],
     server: { port, host },
+    base: "./"
   }
 })
