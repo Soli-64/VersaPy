@@ -10,16 +10,16 @@ type InvokeOptions = {
   result: string
 }
 
-export const invoke = (funcName: string, args = {}) => {
+export const invoke = <T>(funcName: string, args = {}) => {
 
-  return new Promise((resolve, reject) => {
+  return new Promise<T>((resolve, reject) => {
     
     socket.emit("invoke", { func: funcName, args });
     
     socket.once("response", (options: InvokeOptions) => {
     
       if (options.error) reject(new Error(options.error));
-      else resolve(options.result);
+      else resolve(options.result as T);
     
     });
   
@@ -27,45 +27,48 @@ export const invoke = (funcName: string, args = {}) => {
 
 }
 
-// Base Events
-
-export const onEvent = (event: string, callback: () => void) => {
-  socket.on(event, callback)
-}
-
 type SharedValueEventOptions<T> = {
   value_key: string
   value: T
 }
 
-export const useSharedValue = <T>(sharedValueKey: string, initValue: T, onChange: (value: T) => void): [T, (value: T) => void] => {
-
-  let value: T = initValue;
+export const createSharedValue = <T>(
+  sharedValueKey: string,
+  onChange: (value: T) => void
+): [ T | null, (value: T) => void] => {
+  
+  let sharedValue: T | null = null;
 
   const events = {
-    onChange: "back_update_shared_value",
-    setChange: "front_update_shared_value"
+    onUpdate: "back_update_shared_value",
+    setUpdate: "front_update_shared_value",
   }
 
-  const setChange = (_value: T) => {
-    console.log("Sent: ", {
-      value_key: sharedValueKey,
-      value: _value
+  invoke<T>("get_shared_value", { key: sharedValueKey })
+    .then(initialValue => {
+      if (initialValue !== undefined && initialValue !== null) {
+        sharedValue = initialValue
+        onChange(initialValue)
+      }
     })
-    socket.emit(events.setChange, {
+    .catch(console.error)
+
+  const handleUpdate = (options: SharedValueEventOptions<T>) => {
+    if (options.value_key === sharedValueKey) {
+      sharedValue = options.value
+      onChange(options.value)
+    }
+  }
+  socket.on(events.onUpdate, handleUpdate)
+
+  const setValue = (_value: T) => {
+    socket.emit(events.setUpdate, {
       value_key: sharedValueKey,
-      value: _value
+      value: _value,
     })
-    value = _value
+    sharedValue = _value
     onChange(_value)
   }
 
-  socket.on(events.onChange, (options: SharedValueEventOptions<T>) => {
-    if (options.value_key !== sharedValueKey) return
-    value = options.value
-    onChange(value)
-  })
-
-  return [value, setChange];
-
+  return [sharedValue, setValue]
 }

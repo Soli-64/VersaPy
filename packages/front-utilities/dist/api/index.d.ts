@@ -1,3 +1,2 @@
-export declare const invoke: (funcName: string, args?: {}) => Promise<unknown>;
-export declare const onEvent: (event: string, callback: () => void) => void;
-export declare const useSharedValue: <T>(sharedValueKey: string, initValue: T, onChange: (value: T) => void) => [T, (value: T) => void];
+export declare const invoke: <T>(funcName: string, args?: {}) => Promise<T>;
+export declare const createSharedValue: <T>(sharedValueKey: string, onChange: (value: T) => void) => [T | null, (value: T) => void];

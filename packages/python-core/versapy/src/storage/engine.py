@@ -1,11 +1,12 @@
 import sqlite3
 import json
-from pathlib import Path
+from ..utils.system import get_app_storage_path
 
 class StorageEngine:
     
-    def __init__(self, path="storage.db"):
-        self.path = Path(path)
+    def __init__(self, project_name):
+        storage_path = get_app_storage_path()
+        self.path = storage_path / f"{project_name}-storage.db"
         self.conn = sqlite3.connect(self.path)
         self.conn.execute("""
             CREATE TABLE IF NOT EXISTS models (
@@ -29,6 +30,3 @@ class StorageEngine:
             (model_name, json_data)
         )
         self.conn.commit()
-
-
-engine = StorageEngine()

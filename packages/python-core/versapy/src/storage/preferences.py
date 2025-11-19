@@ -1,5 +1,5 @@
-
 import json, os, threading
+from ..utils.system import get_app_storage_path
 
 class PreferencesStorage:
     """JSON file-based storage for basic key-value storage"""
@@ -7,12 +7,11 @@ class PreferencesStorage:
     def __init__(self, project_name: str):
         self.project_name = project_name
         self._lock = threading.Lock()
-        self._base_dir = os.path.join(os.path.expanduser("~"), ".versapy")
-        os.makedirs(self._base_dir, exist_ok=True)
-        self._file_path = os.path.join(self._base_dir, f"{self.project_name}.json")
+        storage_path = get_app_storage_path()
+        self._file_path = storage_path / f"{self.project_name}-preferences.json"
 
     def _load(self) -> dict:
-        if not os.path.exists(self._file_path):
+        if not self._file_path.exists():
             return {}
         with open(self._file_path, "r", encoding="utf-8") as f:
             try:

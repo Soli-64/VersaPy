@@ -1,20 +1,18 @@
 from pydantic import BaseModel
-from .engine import engine
 from .field import Field
 
 class Model(BaseModel):
+
     class Config:
         arbitrary_types_allowed = True
-        validate_assignment = True  # re-valide quand on change un champ
+        validate_assignment = True
         extra = "forbid"
 
     @classmethod
-    def load(cls):
-        """Charge depuis la DB ou crée un modèle avec valeurs par défaut."""
-        data = engine.load(cls.__name__)
+    def __load(cls, storage_engine):
+        data = storage_engine.load(cls.__name__)
 
         if data is None:
-            # fabrication des defaults
             defaults = {}
             for k, field in cls.__annotations__.items():
                 attr = getattr(cls, k, None)
@@ -24,6 +22,6 @@ class Model(BaseModel):
 
         return cls(**data)
 
-    def save(self):
-        """Sauvegarde dans la DB."""
-        engine.save(self.__class__.__name__, self.dict())
+    def __save(self, storage_engine):
+        storage_engine.save(self.__class__.__name__, self.dict())
+        

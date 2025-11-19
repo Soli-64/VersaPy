@@ -14,33 +14,35 @@ export const invoke = (funcName, args = {}) => {
         });
     });
 };
-// Base Events
-export const onEvent = (event, callback) => {
-    socket.on(event, callback);
-};
-export const useSharedValue = (sharedValueKey, initValue, onChange) => {
-    let value = initValue;
+export const createSharedValue = (sharedValueKey, onChange) => {
+    let sharedValue = null;
     const events = {
-        onChange: "back_update_shared_value",
-        setChange: "front_update_shared_value"
+        onUpdate: "back_update_shared_value",
+        setUpdate: "front_update_shared_value",
     };
-    const setChange = (_value) => {
-        console.log("Sent: ", {
+    invoke("get_shared_value", { key: sharedValueKey })
+        .then(initialValue => {
+        console.log("Received initVal: ", initialValue);
+        if (initialValue !== undefined && initialValue !== null) {
+            sharedValue = initialValue;
+            onChange(initialValue);
+        }
+    })
+        .catch(console.error);
+    const handleUpdate = (options) => {
+        if (options.value_key === sharedValueKey) {
+            sharedValue = options.value;
+            onChange(options.value);
+        }
+    };
+    socket.on(events.onUpdate, handleUpdate);
+    const setValue = (_value) => {
+        socket.emit(events.setUpdate, {
             value_key: sharedValueKey,
-            value: _value
+            value: _value,
         });
-        socket.emit(events.setChange, {
-            value_key: sharedValueKey,
-            value: _value
-        });
-        value = _value;
+        sharedValue = _value;
         onChange(_value);
     };
-    socket.on(events.onChange, (options) => {
-        if (options.value_key !== sharedValueKey)
-            return;
-        value = options.value;
-        onChange(value);
-    });
-    return [value, setChange];
+    return [sharedValue, setValue];
 };
