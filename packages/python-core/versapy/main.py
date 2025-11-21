@@ -9,11 +9,10 @@ from .src.storage.preferences import PreferencesStorage
 from fastapi import FastAPI
 from .src.utils.logs import Log
 from .src.storage.model import Model
-from .src.storage.field import Field
 import sys
 import threading as th
 import webview
-import socketio 
+import socketio
 import asyncio
 import os
 import http.server
@@ -33,7 +32,7 @@ class VersaPyApp:
 
         self.config = load_config(MODE)
 
-        self.storage = StorageEngine(self.config.PROJECT_NAME)
+        self.storage = StorageEngine(self, self.config.PROJECT_NAME)
         self.preferences = PreferencesStorage(self.config.PROJECT_NAME)
 
         self.sio.on("invoke", self.__invoke)
@@ -90,11 +89,11 @@ class VersaPyApp:
 
         return sv
 
-    def store(self, model: Model):
-        model.__save(self.storage)
+    def get_stored_all(self, model: Model):
+        return self.storage.get_all(model)
 
-    def get(self, model: Model):
-        model.__load(self.storage)
+    def get_stored_one(self, model_id: int):
+        return self.storage.get(model_id)
 
     # run app
     def run(self, debug=True):

@@ -7,7 +7,7 @@ class PreferencesStorage:
     def __init__(self, project_name: str):
         self.project_name = project_name
         self._lock = threading.Lock()
-        storage_path = get_app_storage_path()
+        storage_path = get_app_storage_path(project_name)
         self._file_path = storage_path / f"{self.project_name}-preferences.json"
 
     def _load(self) -> dict:

@@ -5,7 +5,7 @@
 
 ## <u> About </u>
 
-#### This module manages backend server using FastAPI, Uvicorn and SokectIO. <br/> It reads configs, and run the app using PyWebVIew. <br/> The Building functionnality is only available on Windows for now. 
+#### This module manages backend server using FastAPI, Uvicorn and SocketIO. <br/> It reads configs, and run the app using PyWebVIew. <br/> The Building functionnality is only available on Windows for now. 
 
 ## <u> Usage </u>
 

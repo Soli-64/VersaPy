@@ -1,27 +1,32 @@
 from pydantic import BaseModel
-from .field import Field
 
 class Model(BaseModel):
+
+    id: int | None = None
 
     class Config:
         arbitrary_types_allowed = True
         validate_assignment = True
         extra = "forbid"
 
-    @classmethod
-    def __load(cls, storage_engine):
-        data = storage_engine.load(cls.__name__)
+    def __init__(self, app, _id=None, _config=None, **data):
+        super().__init__(**data)
+        print("Model __init__")
+        if _id is not None:
+            self.id = _id
+        if _config is not None:
+            return
+        self._storage = app.storage
+        self.__save()
 
-        if data is None:
-            defaults = {}
-            for k, field in cls.__annotations__.items():
-                attr = getattr(cls, k, None)
-                if isinstance(attr, Field):
-                    defaults[k] = attr.default
-            return cls(**defaults)
+    def update(self, **data):
+        for key, value in data.items():
+            setattr(self, key, value)
+        self.__save()
 
-        return cls(**data)
-
-    def __save(self, storage_engine):
-        storage_engine.save(self.__class__.__name__, self.dict())
-        
+    def __save(self):
+        if self.id is None:
+            self.id = self._storage._create(self)
+        else:
+            self._storage._save(self.id, self.model_dump())
+    
