@@ -29,4 +29,9 @@ class Model(BaseModel):
             self.id = self._storage._create(self)
         else:
             self._storage._save(self.id, self.model_dump())
+
+    def delete(self):
+        if self.id is not None:
+            self._storage._delete(self.id)
+            self.id = None
     

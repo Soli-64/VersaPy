@@ -89,11 +89,11 @@ class VersaPyApp:
 
         return sv
 
-    def get_stored_all(self, model: Model):
+    def get_all(self, model: Model):
         return self.storage.get_all(model)
 
-    def get_stored_one(self, model_id: int):
-        return self.storage.get(model_id)
+    def get(self, model: Model, model_id: int):
+        return self.storage.get(model, model_id)
 
     # run app
     def run(self, debug=True):
