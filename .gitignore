@@ -9,6 +9,9 @@ packages/front-utilities/dist
 packages/python-core/build
 packages/python-core/dist
 packages/python-core/versapy.egg-info
+packages/python-core/publish.bat
+
+*.bat
 
 build
 dist
