@@ -10,7 +10,11 @@ class StorageEngine:
         self.app = app
         self.path = storage_path / f"{project_name}-storage.db"
         try:
-            self.conn = sqlite3.connect(self.path)
+            self.conn = sqlite3.connect(
+                self.path,
+                check_same_thread=False,
+                timeout=10.0
+                )
             self.conn.execute("""
                 CREATE TABLE IF NOT EXISTS models (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
