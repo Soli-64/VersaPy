@@ -229,9 +229,11 @@ const managePythonEnv = () => {
 
 }
 
-const manageTemplatesCopy = async (name, venvPath) => {
+const manageTemplatesCopy = async (name) => {
     
-    let winName = name !== "." ? name : "MyVersapyApp" // Using default name if project was created in current dir
+    const folderName = path.basename(process.cwd())
+
+    let winName = name !== "." ? name : folderName // Using default name if project was created in current dir
     
     // Creating versapy.config.json
     const config = {
