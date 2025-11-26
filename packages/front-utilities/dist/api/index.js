@@ -3,31 +3,54 @@ import { loadUserConfig } from "../utils/config.js";
 const config = await loadUserConfig();
 let BACKEND_URL = `http://${config.backend.host}:${config.backend.port}`;
 const socket = io(BACKEND_URL);
-export const invoke = (funcName, args = {}) => {
+let __invokeReqCounter = 0;
+export const invoke = (funcName, args = {}, timeoutMs = 10000) => {
+    // simple incremental id generator
+    const nextId = () => `${Date.now()}-${++__invokeReqCounter}`;
+    const id = nextId();
+    console.log("invoke", funcName, args, "id=" + id);
     return new Promise((resolve, reject) => {
-        socket.emit("invoke", { func: funcName, args });
-        socket.once("response", (options) => {
+        const onResponse = (options) => {
+            // ignore responses that don't match our id
+            if (!options)
+                return;
+            if (!options.id) {
+                // server didn't echo id; cannot safely match concurrent requests
+                console.warn('invoke: response without id received; ignoring to avoid cross-talk');
+                return;
+            }
+            if (options.id !== id)
+                return;
+            // remove listener
+            socket.off("response", onResponse);
+            // clear timeout then resolve/reject
+            clearTimeout(to);
             if (options.error)
-                reject(new Error(options.error));
-            else
-                resolve(options.result);
-        });
+                return reject(new Error(options.error));
+            return resolve(options.result);
+        };
+        // attach listener
+        socket.on("response", onResponse);
+        // send request with id so the server can echo it back
+        socket.emit("invoke", { func: funcName, args, id });
+        // timeout safety
+        const to = setTimeout(() => {
+            socket.off("response", onResponse);
+            reject(new Error("invoke timeout"));
+        }, timeoutMs);
     });
 };
-export const createSharedValue = (sharedValueKey, onChange) => {
+export const createSharedValue = async (sharedValueKey, onChange) => {
     let sharedValue = null;
     const events = {
         onUpdate: "back_update_shared_value",
         setUpdate: "front_update_shared_value",
     };
-    invoke("get_shared_value", { key: sharedValueKey })
-        .then(initialValue => {
-        if (initialValue !== undefined && initialValue !== null) {
-            sharedValue = initialValue;
-            onChange(initialValue);
-        }
-    })
-        .catch(console.error);
+    console.log("Fetching initial shared value for key:", sharedValueKey);
+    const r = await invoke("get_shared_value", { key: sharedValueKey });
+    console.log(r, "initial shared value");
+    sharedValue = r;
+    onChange(sharedValue);
     const handleUpdate = (options) => {
         if (options.value_key === sharedValueKey) {
             sharedValue = options.value;

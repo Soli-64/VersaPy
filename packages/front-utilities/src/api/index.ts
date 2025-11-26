@@ -5,26 +5,52 @@ const config = await loadUserConfig()
 let BACKEND_URL = `http://${config.backend.host}:${config.backend.port}`
 const socket = io(BACKEND_URL)
 
+let __invokeReqCounter = 0
+
 type InvokeOptions = {
   error?: string
   result: string
+  id?: string
 }
 
-export const invoke = <T>(funcName: string, args = {}) => {
+export const invoke = <T>(funcName: string, args = {}, timeoutMs = 10000) => {
+  // simple incremental id generator
+  const nextId = () => `${Date.now()}-${++__invokeReqCounter}`
+
+  const id = nextId()
+  console.log("invoke", funcName, args, "id=" + id)
 
   return new Promise<T>((resolve, reject) => {
-    
-    socket.emit("invoke", { func: funcName, args });
-    
-    socket.once("response", (options: InvokeOptions) => {
-    
-      if (options.error) reject(new Error(options.error));
-      else resolve(options.result as T);
-    
-    });
-  
-  });
+    const onResponse = (options: InvokeOptions) => {
+      // ignore responses that don't match our id
+      if (!options) return
+      if (!options.id) {
+        // server didn't echo id; cannot safely match concurrent requests
+        console.warn('invoke: response without id received; ignoring to avoid cross-talk')
+        return
+      }
+      if (options.id !== id) return
 
+      // remove listener
+      socket.off("response", onResponse)
+      // clear timeout then resolve/reject
+      clearTimeout(to)
+      if (options.error) return reject(new Error(options.error))
+      return resolve(options.result as T)
+    }
+
+    // attach listener
+    socket.on("response", onResponse)
+
+    // send request with id so the server can echo it back
+    socket.emit("invoke", { func: funcName, args, id })
+
+    // timeout safety
+    const to = setTimeout(() => {
+      socket.off("response", onResponse)
+      reject(new Error("invoke timeout"))
+    }, timeoutMs)
+  })
 }
 
 type SharedValueEventOptions<T> = {
@@ -32,10 +58,10 @@ type SharedValueEventOptions<T> = {
   value: T
 }
 
-export const createSharedValue = <T>(
+export const createSharedValue = async <T>(
   sharedValueKey: string,
-  onChange: (value: T) => void
-): [ T | null, (value: T) => void] => {
+  onChange: (value: T) => void,
+): Promise<[ T | null, (value: T) => void]> => {
   
   let sharedValue: T | null = null;
 
@@ -44,14 +70,11 @@ export const createSharedValue = <T>(
     setUpdate: "front_update_shared_value",
   }
 
-  invoke<T>("get_shared_value", { key: sharedValueKey })
-    .then(initialValue => {
-      if (initialValue !== undefined && initialValue !== null) {
-        sharedValue = initialValue
-        onChange(initialValue)
-      }
-    })
-    .catch(console.error)
+  console.log("Fetching initial shared value for key:", sharedValueKey)
+  const r = await invoke<T>("get_shared_value", { key: sharedValueKey })
+  console.log(r, "initial shared value")
+  sharedValue = r
+  onChange(sharedValue)
 
   const handleUpdate = (options: SharedValueEventOptions<T>) => {
     if (options.value_key === sharedValueKey) {

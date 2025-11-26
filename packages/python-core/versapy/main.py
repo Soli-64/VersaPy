@@ -41,15 +41,27 @@ class VersaPyApp:
     async def __invoke(self, sid, data):
         func_name = data.get("func")
         args = data.get("args", {})
+        req_id = data.get("id")
         if func_name not in self.commands:
-            await self.sio.emit("response", {"error": "Function not found"}, to=sid)
+            # include request id when available so client can correlate
+            payload = {"error": "Function not found"}
+            if req_id is not None:
+                payload["id"] = req_id
+            await self.sio.emit("response", payload, to=sid)
             return
         try:
             f = self.commands[func_name]
             result = await f(**args) if asyncio.iscoroutinefunction(f) else f(**args)
-            await self.sio.emit("response", {"result": result}, to=sid)
+            # include request id in success response when provided
+            payload = {"result": result}
+            if req_id is not None:
+                payload["id"] = req_id
+            await self.sio.emit("response", payload, to=sid)
         except Exception as e:
-            await self.sio.emit("response", {"error": str(e)}, to=sid)
+            payload = {"error": str(e)}
+            if req_id is not None:
+                payload["id"] = req_id
+            await self.sio.emit("response", payload, to=sid)
 
     def __expose_fn(self, command: str, fn: Callable):
         self.commands[command] = fn
