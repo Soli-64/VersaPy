@@ -67,32 +67,54 @@ import { createSharedValue } from "versapy/api"
 
 // [...] your app code
 
-const onCounterChange = (value) => {
-    console.log(counterValue)
-}
-
-let [counter, setCounter] = createSharedValue("counter", onCounterChange)
+// In your method / class 
+let [counter, setCounter] = await createSharedValue(
+    "counter",
+    (value) => {
+        console.log(counterValue)
+    }
+)
 
 
 ```
-### If you're using a framework that handle states like react, you might like this trick:
+### If you're using a framework that handle states like react, you might like this use:
 ```js
 import { createSharedValue } from "versapy/api";
 import { useState } from "react";
 
-// With this hook, the createSharedValue onChange method is handled by the useState, 
-// for a fully reactive experience
-const useCounter = (initCount) => {
+class Manager {
 
-    const [count, setCount] = useState(initCount)
-    const [shared, setShared] = createSharedValue(
-        "counter",  
-        (val) => setCount(val)
-    )
+    constructor() {
+        this.data = {};
+        this.setData = () => {};
+    }
+    
+    create_sv = async (onChange) => {
+        [this.data, this.setData] = await createSharedValue(
+            "counter",
+            (val) => {
+                this.data = val
+                onChange(val)
+            }
+        )
+    }
+}
 
-    // return count for a reactive value
-    return [count, setShared]
+const manager = new Manager()
+
+const App = () => {
+
+    // _setData because only for sv use, don't call it to avoid unexpected behaviors.
+    const [data,_setData] = useState({})
+
+    useEffect(() => {
+        manager.create_sv(_setData)
+    }, [])
+
+    // You can now use manager.data (or data) and manager.setData in your component. The value persist between re-renders, as it's instantly stored in back.
 
 }
 
 ```
+
+### You can try to use the createSharedValue method in a hook, but re-renders might cause unexpected behaviors.

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "versapy"
-version = "1.2.1"
+version = "1.2.2"
 description = "Lightweight framework for desktop apps with web UI."
 authors = [
   { name = "lso", email = "lso.contact@proton.me" }
